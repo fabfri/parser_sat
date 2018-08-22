@@ -3,12 +3,13 @@ import sys
 import argparse
 
 db = []
+outfile = None
 
 def usage():
   print('In usage')
 
 def oprint(line):
-  if outfile != '':
+  if outfile != None:
     of.write(line + '\n')
   else:
     print(line)
@@ -64,7 +65,12 @@ def parseInput(inputFile):
 # #3,#4,#5,#49,,#6,#18-#23,#20,#17,,,,,,#45,Soci
 #  
 def sat2skebby():
-  print('Print skebby format')
+  print('Print skebby format', end='')
+  if outfile is not None:
+    print(' on file %s' % outfile)
+  else:
+    print()
+  
   header = 'lastname;firstname;nickname;email;gender;birthday;address;\
   zipcode;city;state;note;custom1;custom2;custom3;phonenumber;groups'
   
@@ -108,7 +114,12 @@ def sat2skebby():
 # lastname, firstname, birthday, email, phone, address, city
 #
 def sat2easy():
-  print('Print readable format')
+  print('Print readable format', end='')
+  if outfile is not None:
+    print(' on file %s' % outfile)
+  else:
+    print()
+  
   header = 'cognome,nome,data nascita,email,numero,indirizzo'
 
   oprint(header)
@@ -140,7 +151,12 @@ def sat2easy():
 # #4#3,#4,,#3,,,,,,,,#5,,,,,#20,,,,,,#49,,,,#45,,,
 # 
 def sat2gmail():
-  print('Print gmail format')
+  print('Print gmail format', end='')
+  if outfile is not None:
+    print(' on file %s' % outfile)
+  else:
+    print()
+
   header = 'Name,Given Name,Additional Name,Family Name,Yomi Name,\
   Given Name Yomi,Additional Name Yomi,Family Name Yomi,Name Prefix,\
   Name Suffix,Initials,Nickname,Short Name,Maiden Name,Birthday,Gender,\
@@ -253,7 +269,7 @@ def main():
     parser.print_usage()
     sys.exit(1)
 
-  if args.outfile != '':
+  if args.outfile != None:
     global outfile
     outfile = args.outfile.pop()
     try:
@@ -271,7 +287,8 @@ def main():
   if args.skebby:
     sat2skebby()
 
-  of.close()
+  if outfile is not None:
+    of.close()
 
 if __name__ == "__main__":
   main()
