@@ -2,6 +2,12 @@
 import sys
 import argparse
 
+from signal import signal, SIGPIPE, SIG_DFL
+
+# Ignore SIGPIPE and don't throw exception
+# BrokenPipeError: [Errno 32] Broken pipe on it
+signal(SIGPIPE, SIG_DFL)
+
 db = []
 outfile = None
 
