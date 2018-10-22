@@ -44,7 +44,7 @@ def parseInput(inputFile):
 
     # If numero civico is not empty
     if tokens[26] != '':
-      fields['via'] = fields['via'] + ', ' + tokens[26]
+      fields['via'] = fields['via'] + ' ' + tokens[26]
     # If frazione is not empty
     if tokens[21] != '':
       fields['frazione'] = tokens[21]
@@ -155,8 +155,7 @@ def sat2easy():
 # 
 # Reads SAT format and outputs simple csv format with Gmail contacts format 
 # $lastname, $firstname, $birthday, $email, $address, $city
-# $Name, $GivenName, $AdditionalName, $FamilyName, $YomiName, $GivenNameYomi, $AdditionalNameYomi, $FamilyNameYomi, $NamePrefix, $NameSuffix, $Initials, $Nickname, $ShortName, $MaidenName, $Birthday, $Gender, $Location, $BillingInformation, $DirectoryServer, $Mileage, $Occupation, $Hobby, $Sensitivity, $Priority, $Subject, $Notes, $GroupMembership, $Email1Type, $Email1Value, $Email2Type, $Email2Value, $Phone1Type, $Phone1Value, $Phone2Type, $Phone2Value
-# #4#3,#4,,#3,,,,,,,,#5,,,,,#20,,,,,,#49,,,,#45,,,
+# Name,Given Name,Additional Name,Family Name,Yomi Name,Given Name Yomi,Additional Name Yomi,Family Name Yomi,Name Prefix,Name Suffix,Initials,Nickname,Short Name,Maiden Name,Birthday,Gender,Location,Billing Information,Directory Server,Mileage,Occupation,Hobby,Sensitivity,Priority,Subject,Notes,Language,Photo,Group Membership,E-mail 1 - Type,E-mail 1 - Value,E-mail 2 - Type,E-mail 2 - Value,Phone 1 - Type,Phone 1 - Value
 # 
 def sat2gmail():
   print('Print gmail format', end='')
@@ -166,12 +165,12 @@ def sat2gmail():
     print()
 
   header = 'Name,Given Name,Additional Name,Family Name,Yomi Name,\
-  Given Name Yomi,Additional Name Yomi,Family Name Yomi,Name Prefix,\
-  Name Suffix,Initials,Nickname,Short Name,Maiden Name,Birthday,Gender,\
-  Location,Billing Information,Directory Server,Mileage,Occupation,Hobby,\
-  Sensitivity,Priority,Subject,Notes,Group Membership,E-mail 1 - Type,\
-  E-mail 1 - Value,E-mail 2 - Type,E-mail 2 - Value,Phone 1 - Type,\
-  Phone 1 - Value,Phone 2 - Type,Phone 2 - Value'
+Given Name Yomi,Additional Name Yomi,Family Name Yomi,Name Prefix,\
+Name Suffix,Initials,Nickname,Short Name,Maiden Name,Birthday,Gender,\
+Location,Billing Information,Directory Server,Mileage,Occupation,Hobby,\
+Sensitivity,Priority,Subject,Notes,Language,Photo,Group Membership,E-mail 1 - Type,\
+E-mail 1 - Value,E-mail 2 - Type,E-mail 2 - Value,Phone 1 - Type,\
+Phone 1 - Value'
   oprint(header)
   #initialize record
   gmailRecord = [''] * 35
@@ -203,15 +202,15 @@ def sat2gmail():
     gmailRecord[23] = ''
     gmailRecord[24] = ''
     gmailRecord[25] = ''
-    gmailRecord[26] = '* My Contacts ::: Soci'
-    gmailRecord[27] = '* Other'
-    gmailRecord[28] = record['email']
-    gmailRecord[29] = ''
-    gmailRecord[30] = ''
-    gmailRecord[31] = 'Home'
-    gmailRecord[32] = record['numero']
-    gmailRecord[33] = ''
-    gmailRecord[34] = ''
+    gmailRecord[26] = ''
+    gmailRecord[27] = ''
+    gmailRecord[28] = '* My Contacts ::: Soci'
+    gmailRecord[29] = '* Other'
+    gmailRecord[30] = record['email']
+    gmailRecord[31] = ''
+    gmailRecord[32] = ''
+    gmailRecord[33] = 'Home'
+    gmailRecord[34] = record['numero']
     line = ','.join(gmailRecord)
     if strict:
       if reverse:
