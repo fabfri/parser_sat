@@ -68,9 +68,9 @@ sub sat2skebby(){
   }
 
   my @tokens = split/;/ ;
-  my ( $lastname, $firstname, $nickname, $email, $gender, $birthday, $address, $zipcode, $city, $state, $note, $custom1, $custom2, $custom3, $phonenumber, $groups) = @tokens[3,4,5,49,0,6,0,20,17,0,0,0,0,0,45];
+  my ( $lastname, $firstname, $nickname, $email, $gender, $birthday, $address, $zipcode, $city, $state, $note, $custom1, $custom2, $custom3, $phonenumber, $groups) = @tokens[3,4,5,52,0,9,0,23,20,0,0,0,0,0,48];
   $gender = "";
-  $address = $tokens[21] . " " . $tokens[22] . " " . $tokens[23] . " - " . $tokens[18] . " (" . $tokens[19] .")";
+  $address = $tokens[24] . " " . $tokens[25] . " " . $tokens[26] . " - " . $tokens[21] . " (" . $tokens[22] .")";
   $state = "";
   $note = "";
   $custom1 = "";
@@ -109,8 +109,8 @@ sub sat2csv(){
   }
   
   my @tokens = split/;/ ;
-  my ( $lastname, $firstname, $nickname, $email, $gender, $birthday, $address, $zipcode, $city, $state, $note, $custom1, $custom2, $custom3, $phonenumber, $groups) = @tokens[3,4,5,49,0,6,0,20,17,0,0,0,0,0,45];
-  $address = $tokens[21] . " " . $tokens[22] . " " . $tokens[23] . " - " . $tokens[18] . " (" . $tokens[19] .")";
+  my ( $lastname, $firstname, $nickname, $email, $gender, $birthday, $address, $zipcode, $city, $state, $note, $custom1, $custom2, $custom3, $phonenumber, $groups) = @tokens[3,4,5,52,0,9,0,23,20,0,0,0,0,0,48];
+  $address = $tokens[24] . " " . $tokens[25] . " " . $tokens[26] . " - " . $tokens[21] . " (" . $tokens[22] .")";
 
   $lastname = ucfirst lc $lastname;
   $firstname = ucfirst lc $firstname;
@@ -119,11 +119,11 @@ sub sat2csv(){
   my $string = join(';', @dest);
   if($strict){
     if ($reverse){
-      print $string, "\n" if ($tokens[49] ne "");
+      print $string, "\n" if ($tokens[52] ne "");
     }
     else{
       # salto i soci con indirizzo email
-      print $string, "\n" if ($tokens[49] eq "");
+      print $string, "\n" if ($tokens[52] eq "");
     }
   }
   else{
@@ -179,7 +179,7 @@ sub sat2gmail(){
   #4#3,#4,,#3,,,,,,,,#5,,,,#20,,,,,,#49,,,,#45,,,
   $tokens[0] = "";
   my ($Name, $GivenName, $AdditionalName, $FamilyName, $YomiName, $GivenNameYomi, $AdditionalNameYomi, $FamilyNameYomi, $NamePrefix, $NameSuffix, $Initials, $Nickname, $ShortName, $MaidenName, $Birthday, $Gender, $Location, $BillingInformation, $DirectoryServer, $Mileage, $Occupation, $Hobby, $Sensitivity, $Priority, $Subject, $Notes, $GroupMembership, $Email1Type, $Email1Value, $Email2Type, $Email2Value, $Phone1Type, $Phone1Value, $Phone2Type, $Phone2Value
-  ) = @tokens[0,4,0,3,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,49,0,0,0,45,0,0];
+  ) = @tokens[0,4,0,3,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,52,0,0,0,48,0,0];
   $tokens[4] = ucfirst lc $tokens[4];
   $tokens[3] = ucfirst lc $tokens[3];
 
@@ -187,7 +187,7 @@ sub sat2gmail(){
   $GivenName = $tokens[4];
   $AdditionalName = "";
   $FamilyName = $tokens[3];
-  $Location = $tokens[21] . " " . $tokens[22] . " " . $tokens[23] . " - " . $tokens[18] . " (" . $tokens[19] .")";
+  $Location = $tokens[24] . " " . $tokens[25] . " " . $tokens[26] . " - " . $tokens[21] . " (" . $tokens[22] .")";
   $GroupMembership = "* My Contacts ::: Soci";
   $Email1Type = "* Other";
   $Phone1Type = "Home";

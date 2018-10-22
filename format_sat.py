@@ -34,25 +34,27 @@ def parseInput(inputFile):
     fields['cognome'] = tokens[3]
     fields['nome'] = tokens[4]
     fields['codiceFiscale'] = tokens[5]
-    fields['dataNascita'] = tokens[6]
-    fields['email'] = tokens[49]
-    fields['categoria'] = tokens[10]
-    fields['anni iscrizione'] = tokens[11]
-    fields['provincia'] = tokens[19]
-    fields['CAP'] = tokens[20]
-    fields['città'] = tokens[17]
-    fields['via'] = ' '.join(tokens[21:23])
-    fields['numero'] = tokens[45]
+    fields['dataNascita'] = tokens[9]
+    fields['categoria'] = tokens[13]
+    fields['anni iscrizione'] = tokens[14]
+    fields['città'] = tokens[20]
+    fields['provincia'] = tokens[22]
+    fields['CAP'] = tokens[23]
+    fields['via'] = ' '.join(tokens[24:26])
+
     # If numero civico is not empty
-    if tokens[23] != '':
-      fields['via'] = fields['via'] + ', ' + tokens[23]
+    if tokens[26] != '':
+      fields['via'] = fields['via'] + ', ' + tokens[26]
     # If frazione is not empty
-    if tokens[18] != '':
-      fields['frazione'] = tokens[18]
+    if tokens[21] != '':
+      fields['frazione'] = tokens[21]
       fields['via'] = fields['via'] + ' FRAZ. ' + fields['frazione']
       
     fields['indirizzo'] =  fields['via'] + ' - ' + fields['CAP'] + ' ' + \
     fields['città'] + ' (' + fields['provincia'] + ')'
+    
+    fields['numero'] = tokens[48]
+    fields['email'] = tokens[52]
   
     # Format fields
     fields['nome'] = fields['nome'].title()
