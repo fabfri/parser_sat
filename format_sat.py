@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+import xlrd
+from datetime import datetime, date
 
 from signal import signal, SIGPIPE, SIG_DFL
 
@@ -12,58 +14,63 @@ db = []
 outfile = None
 
 def usage():
-  print('In usage')
+    print('In usage')
 
 def oprint(line):
-  if outfile != None:
-    of.write(line + '\n')
-  else:
-    print(line)
+    if outfile != None:
+        of.write(line + '\n')
+    else:
+        print(line)
 
 def parseInput(inputFile):
-  firstLine = True
-  
-  for line in open(inputFile, encoding='iso-8859-1'):
-    if firstLine:
-      firstLine = False
-      continue
     
-    fields = {}
-    line = line.strip()
-    tokens = line.split(';')
-    fields['cognome'] = tokens[3]
-    fields['nome'] = tokens[4]
-    fields['codiceFiscale'] = tokens[5]
-    fields['dataNascita'] = tokens[9]
-    fields['categoria'] = tokens[13]
-    fields['anni iscrizione'] = tokens[14]
-    fields['città'] = tokens[20]
-    fields['provincia'] = tokens[22]
-    fields['CAP'] = tokens[23]
-    fields['via'] = ' '.join(tokens[24:26])
+    # 0  Codice
+    # 1  Categoria
+    # 2  Cognome
+    # 3  Nome
+    # 4  Codice fiscale
+    # 5  Data nascita
+    # 6  Anno rinnovo
+    # 7  Data rinnovo
+    # 8  N. anni tess.
+    # 9  Email
+    # 10 Email 2
+    # 11 Tel
+    # 12 Tel 2
 
-    # If numero civico is not empty
-    if tokens[26] != '':
-      fields['via'] = fields['via'] + ' ' + tokens[26]
-    # If frazione is not empty
-    if tokens[21] != '':
-      fields['frazione'] = tokens[21]
-      fields['via'] = fields['via'] + ' FRAZ. ' + fields['frazione']
-      
-    fields['indirizzo'] =  fields['via'] + ' - ' + fields['CAP'] + ' ' + \
-    fields['città'] + ' (' + fields['provincia'] + ')'
+    this_year = int(date.today().strftime('%Y'))
+    firstLine = True
+ 
+    book = xlrd.open_workbook(filename=inputFile)
+    sheet = book.sheet_by_index(0)
+    n_rows = sheet.nrows
+    for i in range(0, n_rows):
+        if firstLine:
+            firstLine = False
+            continue
+        line = sheet.row_slice(rowx=i, start_colx=0, end_colx=sheet.ncols)
+        if int(line[6].value) < this_year:
+            continue
     
-    fields['numero'] = tokens[48]
-    fields['email'] = tokens[52]
+        fields = {}
+        fields['categoria'] = line[1].value
+        fields['cognome'] = line[2].value
+        fields['nome'] = line[3].value
+        fields['codice_fiscale'] = line[4].value
+        fields['data_nascita'] = datetime(*xlrd.xldate_as_tuple(line[5].value, 
+            book.datemode)).strftime('%d/%m/%Y')
+        fields['anno_rinnovo'] = line[6].value
+        fields['data_rinnovo'] = line[7].value
+        fields['n_anni_tess'] = line[8].value
+        fields['email'] = line[9].value
+        fields['tel'] = line[11].value
   
-    # Format fields
-    fields['nome'] = fields['nome'].title()
-    fields['cognome'] = fields['cognome'].title()
-    fields['email'] = fields['email'].lower()
-    fields['indirizzo'] = fields['indirizzo'].upper()
-    
-    db.append(fields)
-    
+        # Format fields
+        fields['nome'] = fields['nome'].title()
+        fields['cognome'] = fields['cognome'].title()
+        fields['email'] = fields['email'].lower()
+        
+        db.append(fields)
     
 #
 # Reads SAT format and outputs Skebby import csv format
@@ -89,27 +96,31 @@ def sat2skebby():
   for record in db:
     skebbyRecord[0] = record['cognome']
     skebbyRecord[1] = record['nome']
-    skebbyRecord[2] = record['codiceFiscale']
+    skebbyRecord[2] = record['codice_fiscale']
     skebbyRecord[3] = record['email']
     skebbyRecord[4] = ''
-    skebbyRecord[5] = record['dataNascita']
-    skebbyRecord[6] = record['via']
-    skebbyRecord[7] = record['CAP']
-    skebbyRecord[8] = record['città']
-    skebbyRecord[9] = record['provincia']
+    skebbyRecord[5] = record['data_nascita']
+    #skebbyRecord[6] = record['via']
+    skebbyRecord[6] = ''
+    #skebbyRecord[7] = record['CAP']
+    skebbyRecord[7] = ''
+    #skebbyRecord[8] = record['città']
+    skebbyRecord[8] = ''
+    #skebbyRecord[9] = record['provincia']
+    skebbyRecord[9] = ''
     skebbyRecord[10] = ''
     skebbyRecord[11] = ''
     skebbyRecord[12] = ''
     skebbyRecord[13] = ''
-    skebbyRecord[14] = record['numero']
+    skebbyRecord[14] = record['tel']
     skebbyRecord[15] = 'Soci'
     line = ';'.join(skebbyRecord)
 
     if strict:
       if reverse:
-        if record['numero'] == '': # salto i soci con indirizzo
+        if record['tel'] == '': # salto i soci con indirizzo
           oprint(line)
-      elif record['numero'] != '':
+      elif record['tel'] != '':
         oprint(line)
     else:
       oprint(line)
@@ -137,18 +148,19 @@ def sat2easy():
   for record in db:
     easyRecord[0] = record['cognome']
     easyRecord[1] = record['nome']
-    easyRecord[2] = record['dataNascita']
+    easyRecord[2] = record['data_nascita']
     easyRecord[3] = record['email']
-    easyRecord[4] = record['numero']
-    easyRecord[5] = record['indirizzo']
+    easyRecord[4] = record['tel']
+    #easyRecord[5] = record['indirizzo']
+    easyRecord[5] = ''
 
     line = ','.join(easyRecord)
   
     if strict:
       if reverse:
-        if record['numero'] != '' or record['email'] != '': # salto i soci con indirizzo
+        if record['tel'] != '' or record['email'] != '': # salto i soci con indirizzo
           oprint(line)
-      elif record['numero'] == '' and record['email'] == '':
+      elif record['tel'] == '' and record['email'] == '':
         oprint(line)
     else:
       oprint(line)
@@ -187,12 +199,13 @@ Phone 1 - Value'
     gmailRecord[8] = ''
     gmailRecord[9] = ''
     gmailRecord[10] = ''
-    gmailRecord[11] = record['codiceFiscale']
+    gmailRecord[11] = record['codice_fiscale']
     gmailRecord[12] =  ''
     gmailRecord[13] = ''
-    gmailRecord[14] = record['dataNascita']
+    gmailRecord[14] = record['data_nascita']
     gmailRecord[15] = ''
-    gmailRecord[16] = record['indirizzo']
+    #gmailRecord[16] = record['indirizzo']
+    gmailRecord[16] = ''
     gmailRecord[17] = ''
     gmailRecord[18] = ''
     gmailRecord[19] = ''
@@ -210,7 +223,7 @@ Phone 1 - Value'
     gmailRecord[31] = ''
     gmailRecord[32] = ''
     gmailRecord[33] = 'Home'
-    gmailRecord[34] = record['numero']
+    gmailRecord[34] = record['tel']
     line = ','.join(gmailRecord)
     if strict:
       if reverse:
