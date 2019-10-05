@@ -13,17 +13,23 @@ signal(SIGPIPE, SIG_DFL)
 db = []
 outfile = None
 
+
 def usage():
     print('In usage')
 
+
 def oprint(line):
-    if outfile != None:
+    if outfile is not None:
         of.write(line + '\n')
     else:
         print(line)
 
+
 def parseInput(inputFile):
-    
+
+    # junk column at the beginning of the line
+    offset = 1
+
     # 0  Codice
     # 1  Categoria
     # 2  Cognome
@@ -48,22 +54,30 @@ def parseInput(inputFile):
         if firstLine:
             firstLine = False
             continue
-        line = sheet.row_slice(rowx=i, start_colx=0, end_colx=sheet.ncols)
+        line = sheet.row_slice(rowx=i, start_colx=offset, end_colx=sheet.ncols)
         if int(line[6].value) < this_year:
             continue
     
         fields = {}
+        fields['codice'] = str(int(line[0].value))
         fields['categoria'] = line[1].value
         fields['cognome'] = line[2].value
         fields['nome'] = line[3].value
         fields['codice_fiscale'] = line[4].value
-        fields['data_nascita'] = datetime(*xlrd.xldate_as_tuple(line[5].value, 
-            book.datemode)).strftime('%d/%m/%Y')
-        fields['anno_rinnovo'] = line[6].value
-        fields['data_rinnovo'] = line[7].value
-        fields['n_anni_tess'] = line[8].value
+        fields['data_nascita'] = datetime(
+            *xlrd.xldate_as_tuple(line[5].value, book.datemode)).\
+            strftime('%d/%m/%Y')
+        fields['anno_rinnovo'] = str(int(line[6].value))
+        fields['data_rinnovo'] = datetime(
+            *xlrd.xldate_as_tuple(line[7].value, book.datemode)).\
+            strftime('%d/%m/%Y')
+        fields['n_anni_tess'] = str(int(line[8].value))
         fields['email'] = line[9].value
+        fields['email2'] = line[10].value
         fields['tel'] = line[11].value
+        fields['tel2'] = line[12].value
+        fields['funzioni'] = line[13].value
+        fields['indirizzo_completo'] = line[14].value
   
         # Format fields
         fields['nome'] = fields['nome'].title()
@@ -71,7 +85,58 @@ def parseInput(inputFile):
         fields['email'] = fields['email'].lower()
         
         db.append(fields)
-    
+
+# Print all records in CSV format
+def sat2csv():
+    print('Print CSV format', end='')
+    if outfile is not None:
+        print(' on file %s' % outfile)
+    else:
+        print()
+
+    header = 'Codice;Categoria;Cognome;Nome;Codice Fiscale; Data ' \
+             'nascita;Anno rinnovo;Data rinnovo;N. anni ' \
+             'tess.;Email;Email2;Tel;Tel2;Funzioni;Indirizzo completo'
+
+    oprint(header)
+
+    #initialize record
+    csvRecord = [''] * 15
+
+    # 0  Codice
+    # 1  Categoria
+    # 2  Cognome
+    # 3  Nome
+    # 4  Codice fiscale
+    # 5  Data nascita
+    # 6  Anno rinnovo
+    # 7  Data rinnovo
+    # 8  N. anni tess.
+    # 9  Email
+    # 10 Email 2
+    # 11 Tel
+    # 12 Tel 2
+
+    for record in db:
+        csvRecord[0] = record['codice']
+        csvRecord[1] = record['categoria']
+        csvRecord[2] = record['cognome']
+        csvRecord[3] = record['nome']
+        csvRecord[4] = record['codice_fiscale']
+        csvRecord[5] = record['data_nascita']
+        csvRecord[6] = record['anno_rinnovo']
+        csvRecord[7] = record['data_rinnovo']
+        csvRecord[8] = record['n_anni_tess']
+        csvRecord[9] = record['email']
+        csvRecord[10] = record['email2']
+        csvRecord[11] = record['tel']
+        csvRecord[12] = record['tel2']
+        csvRecord[13] = record['funzioni']
+        csvRecord[14] = record['indirizzo_completo']
+
+        line = ';'.join(csvRecord)
+        oprint(line)
+
 #
 # Reads SAT format and outputs Skebby import csv format
 # $lastname, $firstname, $nickname, $email, $gender, $birthday, $address, 
@@ -219,7 +284,10 @@ Phone 1 - Value'
     gmailRecord[27] = ''
     gmailRecord[28] = '* My Contacts ::: Soci'
     gmailRecord[29] = '* Other'
-    gmailRecord[30] = record['email']
+    if record['email'] != '':
+        gmailRecord[30] = record['email']
+    else:
+        gmailRecord[30] = record['email2']
     gmailRecord[31] = ''
     gmailRecord[32] = ''
     gmailRecord[33] = 'Home'
@@ -227,9 +295,9 @@ Phone 1 - Value'
     line = ','.join(gmailRecord)
     if strict:
       if reverse:
-        if record['email'] == '': # salto i soci con indirizzo email
+        if gmailRecord[30] == '': # salto i soci con indirizzo email
           oprint(line)
-      elif record['email'] != '':
+      elif gmailRecord[30] != '':
         oprint(line) 
     else:
       oprint(line)
@@ -239,17 +307,19 @@ def main():
   parser = argparse.ArgumentParser(description='''Parses SAT soci\'s file and
     exports different CSV formats''')
   parser.add_argument('inputFile', metavar='FILE', nargs=1, \
-                    help='SAT format input file')
+                      help='SAT format input file')
   parser.add_argument('-m','--skebby', action='store_true',
-                    help='Outputs Skebby SMS output format')
+                      help='Outputs Skebby SMS output format')
   parser.add_argument('-g','--gmail', action='store_true', \
-                    help='Outputs Gmail Contacts output format')
+                      help='Outputs Gmail Contacts output format')
   parser.add_argument('-l','--letters', action='store_true', \
-          help='Outputs CSV with basic information')
+                      help='Outputs CSV with basic information')
+  parser.add_argument('-c', '--csv', action='store_true', \
+                      help='Outputs CSV with all columns')
   parser.add_argument('-s','--strict', action='store_true', \
-                    help='''Prints only records strictly valid for the format 
-                    specified (e.g. If "--msg" format is specified and the 
-                    record does not contain number, the record is not printed.
+                      help='''Prints only records strictly valid for the 
+                      format specified (e.g. If "--msg" format is specified and the record does not contain number, 
+                      the record is not printed.
                     ''')
   parser.add_argument('-r','--reverse', action='store_true', \
                     help='''In conjunction with "--strict" prints only records 
@@ -266,8 +336,8 @@ def main():
   strict = args.strict
   reverse = args.reverse
 
-  if not (args.gmail or args.letters or args.skebby):
-    print('Specify either one of -m, -g, or -l options.')
+  if not (args.gmail or args.letters or args.skebby or args.csv):
+    print('Specify either one of -c, -m, -g, or -l options.')
     parser.print_usage()
     sys.exit(1)
   
@@ -304,6 +374,8 @@ def main():
     sat2gmail()
   if args.letters:
     sat2easy()
+  if args.csv:
+    sat2csv()
   if args.skebby:
     sat2skebby()
 
