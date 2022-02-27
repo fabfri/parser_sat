@@ -74,16 +74,17 @@ def parseInput(inputFile):
             *xlrd.xldate_as_tuple(line[5].value, book.datemode)). \
             strftime('%d/%m/%Y')
         fields['anno_rinnovo'] = str(int(line[6].value))
+        fields['assicurazione_integrativa'] = line[7].value
         fields['data_rinnovo'] = datetime(
-            *xlrd.xldate_as_tuple(line[7].value, book.datemode)). \
+            *xlrd.xldate_as_tuple(line[8].value, book.datemode)). \
             strftime('%d/%m/%Y')
-        fields['n_anni_tess'] = str(int(line[8].value))
-        fields['email'] = line[9].value
-        fields['email2'] = line[10].value
-        fields['tel'] = line[11].value
-        fields['tel2'] = line[12].value
-        fields['funzioni'] = line[13].value
-        fields['indirizzo_completo'] = line[14].value
+        fields['n_anni_tess'] = str(int(line[9].value))
+        fields['email'] = line[10].value
+        fields['email2'] = line[11].value
+        fields['tel'] = line[12].value
+        fields['tel2'] = line[13].value
+        fields['funzioni'] = line[14].value
+        fields['indirizzo_completo'] = line[15].value
 
         # Format fields
         fields['nome'] = fields['nome'].title()
